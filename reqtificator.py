@@ -28,8 +28,7 @@ class Reqtificator:
         self.find_files()
         self.retrieve_skills()
         self.retrieve_settings()
-        
-
+        # ss
     def find_files(self):
         self.default_skills_location = glob.glob("./Skills/Default Skills/req_*.gbot")
         self.custom_skills_location = glob.glob("./Skills/Custom Skills/req_*.gbot")
@@ -190,8 +189,8 @@ class GUI(Reqtificator):
         self.save_button = Button(self.top_frame, text="Save", bg=GUI.bg, fg=GUI.fg,
             relief=GROOVE, font=(GUI.fs, 11))
         self.save_button.place(x=489, y=0, height=24, width=78)
-        
-        
+
+
         # Frame at the LEFT
         self.left_frame = Frame(self.master, bg=GUI.rr, width=275, height=255)
         self.left_frame.place(x=10, y=40)
