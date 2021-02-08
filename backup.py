@@ -112,14 +112,14 @@ class GUI(Reqtificator):
 
     rr = "#fc5d5d"
     # rr = "#f2f2f2"
-    rr = bg
+    # rr = bg
 
     select_bg = "#57a8ff"
 
 
     def __init__(self, master):
         self.master = master
-        self.master.geometry("670x450")
+        self.master.geometry("800x450")
         self.master.resizable(False, True)
         self.master["bg"] = "White"
         self.class_mode_var = StringVar()
@@ -185,98 +185,86 @@ class GUI(Reqtificator):
         self.master.config(menu=self.menubar)
 
     def widgets_setup(self):
-        self.master.columnconfigure(0, weight=1)
-        self.master.rowconfigure(1, weight=1)
-
         # Frame at TOP
-        self.top_frame = Frame(self.master, bg=GUI.rr, width=700, height=30)
-        self.top_frame.grid(row=0, column=0, columnspan=4, padx=(10), pady=10, sticky=N+W)
+        self.top_frame = Frame(self.master, bg=GUI.rr, width=784, height=30)
+        self.top_frame.place(x=5, y=15)
 
         self.top_label = Label(self.top_frame, text="Gbot:", bg=GUI.bg, fg=GUI.fg, font=GUI.font)
-        self.top_label.place(x=7, y=0)
+        self.top_label.place(x=10, y=0)
 
-        self.top_dropdown = AutocompleteCombobox(self.top_frame, font=GUI.font, completevalues=[])
-        self.top_dropdown.place(x=55, y=2, width=445, height=25)
+        self.top_dropdown = AutocompleteCombobox(self.top_frame, width=20, font=GUI.font, completevalues=[])
+        self.top_dropdown.place(x=55, y=2, width=570, height=25)
         self.top_dropdown.bind("<<ComboboxSelected>>", lambda x: self.dropdown_focus())
 
         self.save_button = Button(self.top_frame, text="Save", bg=GUI.bg, fg=GUI.fg,
             relief=GROOVE, font=(GUI.fs, 11))
-        self.save_button.place(x=502, y=1, height=27, width=70)
+        self.save_button.place(x=630, y=1, height=27, width=70)
 
         self.load_button = Button(self.top_frame, text="Load", bg=GUI.bg, fg=GUI.fg,
             relief=GROOVE, font=(GUI.fs, 11))
-        self.load_button.place(x=575, y=1, height=27, width=70)
+        self.load_button.place(x=703, y=1, height=27, width=70)
 
         # Frame at the LEFT
-        self.left_frame = Frame(self.master, bg=GUI.rr, width=350, height=400)
-        self.left_frame.grid(row=1, column=0, columnspan=2, padx=15, pady=10, sticky=W+N+S)
-        self.left_frame.rowconfigure(2, weight=1)
-
+        self.left_frame = Frame(self.master, bg=GUI.rr, width=350)
+        self.left_frame.place(x=5, y=50, height=395, relheight=0.6)
         self.left_label = Label(self.left_frame, text="Sections:", bg=GUI.bg, fg=GUI.fg, font=GUI.font)
-        self.left_label.grid(row=0, column=0,  pady=1, sticky=W+N)
+        self.left_label.place(x=10, y=0)
 
-        # self.left_dropdown = ttk.Combobox(self.left_frame, values=[], width=29, font=GUI.font)
-        # self.left_dropdown.grid(row=1, column=0, columnspan=10, padx=(1), pady=1, sticky=N)
-
-        self.left_dropdown = AutocompleteCombobox(self.left_frame, font=GUI.font, width=19, completevalues=[])
-        self.left_dropdown.grid(row=1, column=0, columnspan=10, padx=(1), pady=1, sticky=W+E+N)
-
+        self.left_dropdown = ttk.Combobox(self.left_frame, values=[], width=29, font=GUI.font)
+        self.left_dropdown.place(x=10, y=30)
 
         self.left_listbox = Listbox(self.left_frame, bg=GUI.sub, fg=GUI.fg, bd=1,
             width=29, height=10, relief=GROOVE, font=GUI.font,
             activestyle="none", highlightthickness=0, selectbackground=GUI.select_bg)
-        self.left_listbox.grid(row=2, column=0, columnspan=9, padx=1, pady=1, sticky=S+N)
-
+        self.left_listbox.place(x=10, y=60, relheight=0.5)
+        # , relheight=0.7
         self.left_scroll = Scrollbar(self.left_frame)
         self.left_listbox.config(yscrollcommand=self.left_scroll.set)
         self.left_scroll.config(command=self.left_listbox.yview)
-        self.left_scroll.grid(row=2, column=9, padx=(1), pady=1, sticky=S+N)
+        self.left_scroll.place(x=247, y=60, height=194)
 
 
         # Frame at the RIGHT
-        self.right_frame = Frame(self.master, bg=GUI.rr, width=350, height=400)
-        self.right_frame.grid(row=1, column=3, columnspan=2, padx=(15), pady=10, sticky=W+N+S)
-        self.right_frame.rowconfigure(2, weight=1)
-
+        self.right_frame = Frame(self.master, bg=GUI.rr, width=275, height=255)
+        self.right_frame.place(x=310, y=40)
         self.right_label = Label(self.right_frame, text="Class Skills:", bg=GUI.bg, fg=GUI.fg, font=GUI.font)
-        self.right_label.grid(row=0, column=0,  pady=1, sticky=W+N)
+        self.right_label.place(x=10, y=10)
 
         self.right_label2 = Label(self.right_frame, text="Using:", bg=GUI.bg, fg=GUI.fg, font=GUI.font)
-        self.right_label2.grid(row=0, column=5,  pady=1, sticky=W+N)
+        self.right_label2.place(x=187, y=10)
 
         self.right_switch = Button(self.right_frame, text="Default Skills", bg=GUI.bg, fg=GUI.fg,
-            relief=GROOVE, font=(GUI.fs, 9), command=self.switch)
-        self.right_switch.place(x=200, y=31, height=29, width=88)
+            relief=GROOVE, font=(GUI.fs, 10), command=self.switch)
+        self.right_switch.place(x=187, y=30, height=24)
 
-        self.skills_dropdown = AutocompleteCombobox(self.right_frame, font=GUI.font, width=19, completevalues=self.default_skill_list)
-        self.skills_dropdown.grid(row=1, column=0, columnspan=5, padx=(1), pady=1, sticky=N+W)
+        self.skills_dropdown = ttk.Combobox(self.right_frame, values=self.default_skill_list, width=19, font=GUI.font)
+        self.skills_dropdown.place(x=10, y=30)
         self.skills_dropdown.bind("<<ComboboxSelected>>", lambda x: self.insert_skills(x))
 
         self.skills_listbox = Listbox(self.right_frame, bg=GUI.sub, fg=GUI.fg, bd=1,
             width=29, height=10, relief=GROOVE, font=GUI.font,
             activestyle="none", highlightthickness=0, selectbackground=GUI.select_bg)
-        self.skills_listbox.grid(row=2, column=0, columnspan=9, padx=1, pady=1, sticky=S+N)
+        self.skills_listbox.place(x=10, y=60)
 
         self.right_scroll = Scrollbar(self.right_frame)
         self.skills_listbox.config(yscrollcommand=self.right_scroll.set)
         self.right_scroll.config(command=self.skills_listbox.yview)
-        self.right_scroll.grid(row=2, column=9, padx=(1), pady=1, sticky=S+N)
+        self.right_scroll.place(x=247, y=60, height=194)
 
 
         # Frames at the bottom
-        self.bottom_frame = Frame(self.master, bg=GUI.rr, width=700, height=30)
-        self.bottom_frame.grid(row=3, column=0, columnspan=4, padx=13, pady=5, sticky=W+E+N)
+        self.bottom_frame = Frame(self.master, bg=GUI.rr, width=575, height=40)
+        self.bottom_frame.place(x=10, y=300)
 
         self.reset_section_button = Button(self.bottom_frame, text="Reset Section", bg=GUI.bg, fg=GUI.fg, relief=GROOVE, font=GUI.font)
-        self.reset_section_button.place(x=80, width=120, height=27)
-
+        self.reset_section_button.place(x=80, width=100, height=25)
         self.set_section_button = Button(self.bottom_frame, text="Use Skills", bg=GUI.bg, fg=GUI.fg, relief=GROOVE, font=GUI.font)
-        self.set_section_button.place(x=430, width=120, height=27)
-
+        self.set_section_button.place(x=395, width=100, height=25)
 
     def dropdown_focus(self):
         self.top_frame.focus()
         # self.top_dropdown.focus_set()
+
 
     def section_list(self):
         self.section_list = Toplevel()
