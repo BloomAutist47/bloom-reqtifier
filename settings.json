@@ -1,7 +1,27 @@
 {
-    "sections_names": [
-        "- skill section -",
-        "- skill section2 -"
-    ],
+    "sections_names": {
+        "0AK8HO": {
+            "type": "single",
+            "value_1": "Armors455"
+        },
+        "6UERC3": {
+            "type": "single",
+            "value_1": "Section4"
+        },
+        "578YJ9": {
+            "type": "single",
+            "value_1": "section 1"
+        },
+        "1LEAT4": {
+            "type": "dual",
+            "value_1": "section 2ssss",
+            "value_2": ""
+        },
+        "M6ICGT": {
+            "type": "dual",
+            "value_1": "2222222",
+            "value_2": "asdasd"
+        }
+    },
     "GrimoirePath": "C:/Games/Grimoire 3.8+ PRO v1.7.8/Bots"
 }
