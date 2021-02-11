@@ -9,9 +9,382 @@ import ctypes
 import string
 import random
 from ttkwidgets.autocomplete import AutocompleteCombobox
+import configparser
 
 ctypes.windll.shcore.SetProcessDpiAwareness(2)
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
+
+
+class Gbots:
+
+    def __init__(self, path):
+        self.file_path = path
+        self.bot_name = path.split("\\")[-1]
+        self.command_list = []
+
+        with open(path, "r", encoding='utf-8') as f:
+            self.file_json = json.load(f)
+
+
+    def get_commands(self):
+        th = self.settings["Config.cfg"]
+        comms = self.file_json["Commands"]["$values"]
+        ItemNoColon = ["Is in combat", "Is not in combat", "Is Member", "Is Not Member"]
+        index = 0
+        for item in comms:
+            
+            cmd = item["$type"]
+
+            while True:
+                # Combat tab
+                # Kill
+                if "CmdKill" in cmd:
+                    pack = (index, f"Kill {item['Monster']}", th['KillColor'])
+                    break
+                # Attack
+                if "CmdAttack" in cmd:
+                    pack = (index, f"Attack {item['Monster']}", th['AttackColor'])
+                    break
+                # Kill for Items
+                if "CmdKillFor" in cmd:
+                    pack = (index, f"Kill for items: {item['Monster']}", th['KillForColor'])
+                    break
+                # Kill for tempitems
+                if "CmdKillFor" in cmd and "ItemType" in item:
+                    pack = (index, f"Kill for tempitems: {item['Monster']}", th['KillForColor'])
+                    break
+                # Use Skill (cmd)
+                if "CmdUseSkill" in cmd:
+                    pack = (index, f"Skill {item['Skill']}", th['UseSkillColor'])
+                    break
+                # Add Skill (cmd)
+                if "CmdSkillSet" in cmd:
+                    pack = (index, f"Skill Set: {item['Name'].upper()}", th['SkillSetColor'])
+                    break
+                # Rest
+                if "CmdRest" in cmd:
+                    pack = (index, "Rest", th['RestColor'])
+                    break
+                # Rest fully
+                if "CmdRest" in cmd and "Full" in item:
+                    pack = (index, "Rest Fully", th['RestColor'])
+                    break
+
+
+                # Item tab
+                # Get Drop
+                if "Item.CmdGetDrop" in cmd:
+                    pack = (index, f"Get drop: {item['ItemName']}", th['GetDropColor'])
+                    break
+                # Sell Drop
+                if "Item.CmdSell" in cmd:
+                    pack = (index, f"Sell: {item['ItemName']}", th['SellColor'])
+                    break
+                # Equip Drop
+                if "Item.CmdEquip" in cmd:
+                    pack = (index, f"Equip: {item['ItemName']}", th['EquipColor'])
+                    break
+                # To bank from inv
+                if "Item.CmdBankTransfer" in cmd:
+                    pack = (index, f"Inv -> Bank: {item['ItemName']}", th['BankTransferColor'])
+                    break
+                # To inv from bank
+                if "Item.CmdBankTransfer" in cmd and "TransferFromBank" in item:
+                    pack = (index, f"Bank -> Inv: {item['ItemName']}", th['BankTransferColor'])
+                    break
+                # Bank Swap
+                if "Item.CmdBankSwap" in cmd:
+                    pack = (index, f"Bank Swap {{{item['BankItemName']}, {item['InventoryItemName']}}}", th['BankSwapColor'])
+                    break
+                # Load Shop
+                if "Item.CmdLoad" in cmd:
+                    pack = (index, f"Load Shop: {item['ShopId']}", th['LoadBotColor'])
+                    break
+                # Buy item
+                if "Item.CmdBuy" in cmd:
+                    pack = (index, f"Buy item: {item['ItemName']}", th['BuyColor'])
+                    break
+                # Buy item fast
+                if "Item.CmdBuyFast" in cmd:
+                    pack = (index, f"Buy item fast: {item['ItemName']}", th['BuyFastColor'])
+                    break
+                # Get Map Item
+                if "Item.CmdMapItem" in cmd:
+                    pack = (index, f"Get map item: {item['ItemId']}", th['MapItemColor'])
+                    break
+
+                # Map tab
+                # join Map
+                if "Map.CmdJoin" in cmd:
+                    pack = (index, f"Join: {item['Map']}, {item['Cell']}, {item['Pad']}", th['JoinColor'])
+                    break
+                # Jump
+                if "Map.CmdMoveToCell" in cmd:
+                    pack = (index, f"Mote to cell: {item['Cell']}, {item['Pad']}", th['MoveToCellColor'])
+                    break
+                # Yulgar?
+                if "Map.CmdYulgar" in cmd:
+                    pack = (index, "Join yulgar", th['YulgarColor'])
+                    break
+                # Set Spawnpoint
+                if "Map.CmdSetSpawn" in cmd:
+                    pack = (index, "Set Spawnpoint", th['SetSpawnColor'])
+                    break
+                # Walk to
+                if "Map.CmdWalk" in cmd:
+                    pack = (index, f"Walk to: {item['X']}, {item['Y']}", th['WalkColor'])
+                # Walk Randomly
+                if "Map.CmdWalk" in cmd and "Type" in item:
+                    pack = (index, "Walk Randomly", th['WalkColor'])
+                    break
+                # # Walk Randomly
+                # if "Map.CmdSetSpawn" in cmd and "Type" in item:
+                #     pack = (index, "Set Spawnpoint", th['SetSpawnColor'])
+                #     break
+
+                # Quest tab
+                # Complete command
+                if "Quest.CmdCompleteQuest" in cmd and "ItemId" not in item['Quest']:
+                    pack = (index, f"Complete quest: {item['Quest']['QuestID']}", th['CompleteQuestColor'])
+                    break
+                # Complete command with Item ID
+                if "Quest.CmdCompleteQuest" in cmd and "ItemId" in item['Quest']:
+                    pack = (index, f"Complete quest: {item['Quest']['QuestID']}:{item['Quest']['ItemId']}", th['CompleteQuestColor'])
+                    break
+                # Accept command
+                if "Quest.CmdAcceptQuest" in cmd:
+                    pack = (index, f"Accept quest: {item['Quest']['QuestID']}", th['CompleteQuestColor'])
+                    break
+
+                # Misc Tabs
+                # Item Statements
+                if "Misc.Statements" in cmd and "Item" in item["Tag"] and item['Value2'] != "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}, {item['Value2']}", th['CompleteQuestColor'])
+                    break
+                if "Misc.Statements" in cmd and "Item" in item["Tag"] and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}", th['CompleteQuestColor'])
+                    break
+                if "Misc.Statements" in cmd and "Item" in item["Tag"] and item['Value1'] == "" and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}", th['CompleteQuestColor'])
+                    break
+
+                # This Player Statements
+                if "Misc.Statements" in cmd and "This player" in item["Tag"] and item['Value2'] != "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}, {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "This player" in item["Tag"] and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}")
+                    break
+                if "Misc.Statements" in cmd and "This player" in item["Tag"] and item['Value1'] == "" and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}")
+                    break
+
+                # Player Statements
+                if "Misc.Statements" in cmd and "Player" in item["Tag"] and item['Value2'] != "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}, {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Player" in item["Tag"] and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}")
+                    break
+                if "Misc.Statements" in cmd and "Player" in item["Tag"] and item['Value1'] == "" and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}")
+                    break
+
+                # Map Statements
+                if "Misc.Statements" in cmd and "Map" in item["Tag"] and item['Value2'] != "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}, {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Map" in item["Tag"] and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}")
+                    break
+                if "Misc.Statements" in cmd and "Map" in item["Tag"] and item['Value1'] == "" and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}")
+                    break
+
+                # Monster Statements
+                if "Misc.Statements" in cmd and "Monster" in item["Tag"] and item['Value2'] != "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}, {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Monster" in item["Tag"] and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}")
+                    break
+                if "Misc.Statements" in cmd and "Monster" in item["Tag"] and item['Value1'] == "" and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}")
+                    break
+
+                # Quest Statements
+                if "Misc.Statements" in cmd and "Quest" in item["Tag"] and item['Value2'] != "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}, {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Quest" in item["Tag"] and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}: {item['Value1']}")
+                    break
+                if "Misc.Statements" in cmd and "Quest" in item["Tag"] and item['Value1'] == "" and item['Value2'] == "":
+                    pack = (index, f"{item['Text']}")
+                    break
+
+                # Misc Statements
+                if "Misc.Statements" in cmd and "Misc" in item["Tag"] and item['Text'] == "Int Greater Than":
+                    pack = (index, f"Int > {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Misc" in item["Tag"] and item['Text'] == "Int Lesser Than":
+                    pack = (index, f"Int < {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Misc" in item["Tag"] and item['Text'] == "Int is":
+                    pack = (index, f"Int == {item['Value2']}")
+                    break
+                if "Misc.Statements" in cmd and "Misc" in item["Tag"] and item['Text'] == "Int is not":
+                    pack = (index, f"Int != {item['Value2']}")
+                    break
+
+                # Set Bot Delay
+                if "Misc.CmdBotDelay" in cmd:
+                    pack = (index, f"Set bot delay: {item['Delay']}")
+                    break
+                # Set Delay
+                if "Misc.CmdDelay" in cmd:
+                    pack = (index, f"Delay: {item['Delay']}")
+                    break
+                # Set Int 0
+                if "Misc.CmdInt" in cmd and "Value" not in item:
+                    pack = (index, f"Set {item['Int']}: 0")
+                    break
+                # Set Int to Value
+                if "Misc.CmdInt" in cmd and "type" not in item:
+                    pack = (index, f"Set {item['Int']}: {item['Value']}")
+                    break
+                # Set Int Increase
+                if "Misc.CmdInt" in cmd and item["type"] == 1:
+                    pack = (index, f"Increase {item['Int']} by 1")
+                    break
+                # Set Int Decrease
+                if "Misc.CmdInt" in cmd and item["type"] == 2:
+                    pack = (index, f"Decrease {item['Int']} by 1")
+                    break
+                # Send Packet
+                if "Misc.CmdPacket" in cmd and "Client" not in item:
+                    pack = (index, f"Send packet: {item['Packet']}")
+                    break
+                # Send Client Packet
+                if "Misc.CmdPacket" in cmd and "Client" in item:
+                    pack = (index, f"Send client packet: {item['Packet']}")
+                    break
+                # Load Bot Command
+                if "Misc.CmdLoadBot" in cmd:
+                    pack = (index, f"Load bot: {item['BotFileName']}")
+                    break
+                # Goto Player Command
+                if "Misc.CmdGotoPlayer" in cmd:
+                    pack = (index, f"Goto player: {item['PlayerName']}")
+                    break
+                # Command Blank
+                if "Misc.CmdBlank2" in cmd and item["Text"] == " ":
+                    pack = (index, "", "blank_ind")
+                    break
+                # Command Blank with Text
+                if "Misc.CmdBlank2" in cmd and item["Text"] != " ":
+                    data = re.match("\[.+\]", item["Text"])
+                    if data:
+                        data = re.split("(\[.+\])", item["Text"]) 
+                        cr = data[1].replace("[", "").replace("]", "").replace(" ", "").split(",")
+                        color = (int(cr[0]), int(cr[1]), int(cr[2]),)
+                        text = data[2]
+                        pack = (index, text, "blank_ind", color)
+                        # print(f"{item['Text']}: {pack}")
+                        break
+                    pack = (index, item["Text"], "blank_ind")
+                    break
+
+                   
+                # Play Sound
+                if "Misc.CmdBeep" in cmd:
+                    pack = (index, f"Beep {item['Times']} Times")
+                    break
+                # Toggle Provoke Off
+                if "Misc.CmdToggleProvoke" in cmd and "Type" not in item:
+                    pack = (index, "Provoke Off")
+                    break
+                # Toggle Provoke On
+                if "Misc.CmdToggleProvoke" in cmd and item["Type"] == 1:
+                    pack = (index, "Provoke On")
+                    break
+                # Toggle Provoke
+                if "Misc.CmdToggleProvoke" in cmd and item["Type"] == 2:
+                    pack = (index, "Provoke Toggle")
+                    break
+                # Stop Bot
+                if "Misc.CmdStop" in cmd:
+                    pack = (index, "Stop Bot")
+                    break
+                # Restart bot
+                if "Misc.CmdRestart" in cmd:
+                    pack = (index, "Restart bot")
+                    break
+                # Logout
+                if "Misc.CmdLogout" in cmd:
+                    pack = (index, "Logout")
+                    break
+               # Goto
+                if "Misc.CmdGotoLabel" in cmd:
+                    pack = (index, f"Goto Label: {item['Label']}")
+                    break
+               # Add
+                if "Misc.CmdLabel" in cmd:
+                    pack = (index, f"[{item['Name'].upper()}]", "blank_ind")
+                    break
+
+               # Goto Index 0
+                if "Type" in item:
+                    if "Misc.CmdIndex" in cmd and item["Type"] == 2 and "Index" not in item:
+                        pack = (index, "Goto index: 0")
+                        break 
+                   # Goto Index n
+                    if "Misc.CmdIndex" in cmd and item["Type"] == 2 and "Index" in item:
+                        pack = (index, f"Goto index: {item['Index']}")
+                        break
+
+                   # Index down 0
+                    if "Misc.CmdIndex" in cmd and item["Type"] == 1 and "Index" not in item:
+                        pack = (index, f"Index down: 0")
+                        break
+                   # Index down n
+                    if "Misc.CmdIndex" in cmd and item["Type"] == 1 and "Index" in item:
+                        pack = (index, f"Index down: {item['Index']}")
+                        break
+
+               # Index up 0
+                if "Misc.CmdIndex" in cmd and "Type" not in item and "Index" not in item:
+                    pack = (index, f"Index up: 0")
+                    break
+               # Index up n
+                if "Misc.CmdIndex" in cmd and "Type" not in item and "Index" in item:
+                    pack = (index, f"Index up: {item['Index']}")
+                    break
+
+                # Options Tab
+                # Log Debug
+                if "Misc.CmdLog" in cmd and "Debug" in item:
+                    pack = (index, f"Log Debug: {item['Text']}")
+                    break
+                # log Script
+                if "Misc.CmdLog" in cmd and "Debug" not in item:
+                    pack = (index, f"Log Script: {item['Text']}")
+                    break
+
+                # Client Tab
+                # Log Debug
+                if "Misc.CmdChange" in cmd:
+                    pack = (index, f"Name: {item['Text']}")
+                    break
+                # Log Debug
+                if "Misc.CmdChange" in cmd and "Guild" in item:
+                    pack = (index, f"Guild: {item['Text']}")
+                    break
+                pack=(index, "")
+                break
+
+            self.command_list.append(pack)
+            index += 1
 
 
 class Reqtificator:
@@ -24,7 +397,7 @@ class Reqtificator:
         self.default_skill_list = []
         self.custom_skill_list = []
 
-        self.target_gbots_list = []
+        self.gbot_lists = {}
 
         self.settings = {}
         self.section_names = []
@@ -37,6 +410,10 @@ class Reqtificator:
         self.default_skills_location = glob.glob("./Skills/Default Skills/req_*.gbot")
         self.custom_skills_location = glob.glob("./Skills/Custom Skills/req_*.gbot")
         self.target_gbots_location = glob.glob("./Bots/*.gbot")
+
+        for gbot in self.target_gbots_location:
+            name = gbot.split("\\")[-1]
+            self.gbot_lists[name] = Gbots(gbot)
     
     def retrieve_settings(self):
         with open("./settings.json", "r", encoding="utf-8") as f:
@@ -46,6 +423,7 @@ class Reqtificator:
     def save_settings(self):
         with open('./settings.json', 'w', encoding='utf-8') as f:
             json.dump(self.settings, f, ensure_ascii=False, indent=4)
+
     def retrieve_skills(self):
         for skill in self.default_skills_location:
             with open(skill, "r", encoding='utf-8') as f:
@@ -100,6 +478,21 @@ class Reqtificator:
             with open('./Results/test3.gbot', 'w', encoding='utf-8') as f:
                 json.dump(bot_json, f, ensure_ascii=False, indent=4)
             continue
+    def config_read(self):
+        if "Config.cfg" in self.settings:
+            if self.settings["Config.cfg"] != {}:
+                return
+        if "Config.cfg" not in self.settings:
+            self.theme_config = {}
+            with open("./config.cfg", "r") as f:
+                raw_theme = f.read()
+            for i in raw_theme.split("\n"):
+                item = i.split("=")
+                self.theme_config[item[0]] = item[1]
+            pprint(self.theme_config)
+            self.settings["Config.cfg"] = self.theme_config
+            self.save_settings()
+
 
 class GUI(Reqtificator):
     font = ("Calibri Light", 11)
@@ -117,8 +510,9 @@ class GUI(Reqtificator):
 
     def __init__(self, master):
         self.master = master
-        self.master.geometry("670x450+50+100")
+        self.master.geometry("800x600+50+100")
         self.master.resizable(False, True)
+        self.master.title("Pro Reqtifier")
         self.master["bg"] = "White"
         self.class_mode_var = StringVar()
 
@@ -129,29 +523,33 @@ class GUI(Reqtificator):
         # Reqtificator setups
         self.data_setup()
         self.retrieve_skills()
+        self.config_read()
 
         # GUI setups
-        # self.widget_style()
+        self.widget_style()
         self.menu_setup()
         self.widgets_setup()
 
         # Item insertions
-        self.insert_files_dropdown()
         self.section_list_window()
         
 
     def widget_style(self):
         style = ttk.Style()
+        # # this is set background and foreground of the treeview
+        style.configure("Treeview",
+                        background="#44444",
+                        foreground="#000000",
+                        rowheight=17,
+                        fieldbackground="#E1E1E1",
+                        font=(GUI.fs, 9))
 
-        style.map('TCombobox', fieldbackground=[('readonly','white')])
-        style.map('TCombobox', selectbackground=[('readonly', 'white')])
-        style.map('TCombobox', selectforeground=[('readonly', 'black')])
+        # # set backgound and foreground color when selected
+        style.map('Treeview', background=[('selected', '#BFBFBF')], foreground=[('selected', 'black')])
 
     def menu_setup(self):
         # Widget checks
         self.section_is_opened = False
-
-
 
         # Menus
         self.menubar = Menu(self.master)
@@ -171,10 +569,10 @@ class GUI(Reqtificator):
 
         self.directory = Menu(self.menubar, tearoff=0)
         self.directory.add_command(label="Grim Bots Folder", command=self.select_folder )
-        self.directory.add_command(label="Lab Bots Folder", command=lambda: os.startfile(os.path.realpath("./Bots")))
-        self.directory.add_command(label="Results Folder", command=lambda: os.startfile(os.path.realpath("./Results")))
-        self.directory.add_command(label="Default Skills Folder", command=lambda: os.startfile(os.path.realpath("./Skills/Default Skills")))
-        self.directory.add_command(label="Custom Skills Folder", command=lambda: os.startfile(os.path.realpath("./Skills/Custom Skills")))
+        self.directory.add_command(label="Lab Bots Folder", command=lambda: self.open_folder("./Bots"))
+        self.directory.add_command(label="Results Folder", command=lambda: self.open_folder("./Results"))
+        self.directory.add_command(label="Default Skills Folder", command=lambda: self.open_folder("./Skills/Default Skills"))
+        self.directory.add_command(label="Custom Skills Folder", command=lambda: self.open_folder("./Skills/Custom Skills"))
         self.menubar.add_cascade(label="Directories", menu=self.directory)
 
         self.help = Menu(self.menubar, tearoff=0)
@@ -201,10 +599,11 @@ class GUI(Reqtificator):
         self.top_label = Label(self.top_frame, text="Gbot:", bg=GUI.bg, fg=GUI.fg, font=GUI.font)
         self.top_label.place(x=7, y=0)
 
-        self.top_dropdown = AutocompleteCombobox(self.top_frame, font=GUI.font, completevalues=[])
+        self.top_dropdown = AutocompleteCombobox(self.top_frame, font=GUI.font, completevalues=list(self.gbot_lists.keys()))
         self.top_dropdown.bind('<Button-3>',self.rClicker, add='')
         self.top_dropdown.place(x=55, y=2, width=445, height=25)
         self.top_dropdown.bind("<<ComboboxSelected>>", lambda x: self.dropdown_focus())
+        self.top_dropdown.bind("<<ComboboxSelected>>", lambda x: self.insert_commands())
 
         self.save_button = Button(self.top_frame, text="Save", bg=GUI.bg, fg=GUI.fg,
             relief=GROOVE, font=(GUI.fs, 11))
@@ -215,7 +614,7 @@ class GUI(Reqtificator):
         self.load_button.place(x=575, y=1, height=27, width=70)
 
         # Frame at the LEFT
-        self.left_frame = Frame(self.master, bg=GUI.rr, width=350, height=400)
+        self.left_frame = Frame(self.master, bg=GUI.rr, width=550, height=400)
         self.left_frame.grid(row=1, column=0, columnspan=2, padx=15, pady=10, sticky=W+N+S)
         self.left_frame.rowconfigure(2, weight=1)
 
@@ -225,21 +624,40 @@ class GUI(Reqtificator):
         # self.left_dropdown = ttk.Combobox(self.left_frame, values=[], width=29, font=GUI.font)
         # self.left_dropdown.grid(row=1, column=0, columnspan=10, padx=(1), pady=1, sticky=N)
 
-        self.left_dropdown = AutocompleteCombobox(self.left_frame, font=GUI.font, width=19, completevalues=[])
+        self.left_dropdown = AutocompleteCombobox(self.left_frame, font=GUI.font, width=19, completevalues=["All Commands"])
+        self.left_dropdown.current(0)
         self.left_dropdown.bind('<Button-3>',self.rClicker, add='')
         self.left_dropdown.grid(row=1, column=0, columnspan=10, padx=(1), pady=1, sticky=W+E+N)
 
 
-        self.left_listbox = Listbox(self.left_frame, bg=GUI.sub, fg=GUI.fg, bd=1,
-            width=29, height=10, relief=GROOVE, font=GUI.font,
-            activestyle="none", highlightthickness=0, selectbackground=GUI.select_bg)
+        # self.left_listbox = Listbox(self.left_frame, bg=GUI.sub, fg=GUI.fg, bd=1,
+        #     width=35, height=10, relief=GROOVE, font=(GUI.fs, 9),
+        #     activestyle="none", highlightthickness=0, selectbackground=GUI.select_bg)
+        # self.left_listbox.grid(row=2, column=0, columnspan=9, padx=1, pady=1, sticky=S+N)
+
+
+        self.left_listbox = ttk.Treeview(self.left_frame, selectmode='browse', columns=("1", "2")) 
+        self.left_listbox['show'] = 'headings'
+
+        self.left_listbox.column("1", width=50, anchor ='w') 
+        self.left_listbox.heading("1", text="n")
+
+        self.left_listbox.column("2", width=320, anchor ='w') 
+        self.left_listbox.heading("2", text="Commands")
+        
+
         self.left_listbox.grid(row=2, column=0, columnspan=9, padx=1, pady=1, sticky=S+N)
+        
 
         self.left_scroll = Scrollbar(self.left_frame)
         self.left_listbox.config(yscrollcommand=self.left_scroll.set)
         self.left_scroll.config(command=self.left_listbox.yview)
         self.left_scroll.grid(row=2, column=9, padx=(1), pady=1, sticky=S+N)
 
+        self.left_scroll_hor = Scrollbar(self.left_frame, orient="horizontal")
+        self.left_listbox.config(xscrollcommand=self.left_scroll_hor.set)
+        self.left_scroll_hor.config(command=self.left_listbox.xview)
+        self.left_scroll_hor.grid(row=3, column=0, columnspan=9, sticky=E+W)
 
         # Frame at the RIGHT
         self.right_frame = Frame(self.master, bg=GUI.rr, width=350, height=400)
@@ -397,7 +815,6 @@ class GUI(Reqtificator):
             item_ = item_.split("[S] ")[1]
         if "[D]" in item_: 
             item_ = item_.split("[D] ")[1]
-        print(item_)
         item_key_ = ""
         for key in self.settings["sections_names"]:
             if self.settings["sections_names"][key]["value_1"] == item_:
@@ -421,6 +838,8 @@ class GUI(Reqtificator):
         self.section_edit.resizable(False, False)
         self.section_edit["bg"] = GUI.bg
         self.section_edit.focus()
+        self.section_edit.attributes('-topmost', True)
+        self.section_edit.grab_set()
 
         labelframe = Frame(self.section_edit, bg=GUI.rr, height=40)
         labelframe.pack(expand=1, fill='both')
@@ -514,7 +933,6 @@ class GUI(Reqtificator):
                     "value_1": value_1,
                     "value_2": value_2
             }
-        print(self.settings)
         self.sl_listbox.insert(index, type_key + value_1)
         self.save_settings()
 
@@ -538,7 +956,6 @@ class GUI(Reqtificator):
             for key in self.settings["sections_names"]:
                 if self.settings["sections_names"][key]["value_1"] == item:
                     self.settings["sections_names"].pop(key, None)
-                    pprint(self.settings)
                     break
             self.sl_listbox.delete(index)
             self.save_settings()
@@ -580,6 +997,12 @@ class GUI(Reqtificator):
             self.section_is_opened = False
             self.section_list.destroy()
 
+
+    def open_folder(self, dir_):
+        if not os.path.exists(dir_):
+            os.makedirs(dir_)
+        os.startfile(os.path.realpath(dir_))
+
     def select_folder(self):
         if not self.settings["GrimoirePath"]:
             self.settings["GrimoirePath"] = filedialog.askdirectory(title='Please select Grimoire Bot Directory. You can change this later in the Settings.')
@@ -610,6 +1033,28 @@ class GUI(Reqtificator):
             return
 
     # System File inserts
+    def insert_commands(self):
+        item = self.top_dropdown.get()
+        target = self.gbot_lists[item]
+        target.get_commands()
+        self.left_listbox.delete(*self.left_listbox.get_children())
+        for i in target.command_list:
+            if "blank_ind" in i:
+                text = f"{i[1]}"
+                ind = ""
+            else:
+                text = f"{i[1]}"
+                ind = f"[{i[0]}]"
+
+            if len(i) == 4:
+                lin = "#%02x%02x%02x"%i[3]
+                self.left_listbox.insert("", 'end', text=i[0], values=(ind, text, ), tag=(str(i[0]))) 
+                self.left_listbox.tag_configure(str(i[0]), foreground=lin, font=('Calibri', 10,'bold'))
+            else:
+                self.left_listbox.insert("", 'end', text=i[0], values=(ind, text, ) ) 
+
+
+
     def insert_skills(self, event):
         class_name = self.skills_dropdown.get()
         if class_name:
@@ -621,12 +1066,14 @@ class GUI(Reqtificator):
                 index += 1
 
     def insert_files_dropdown(self):
-        self.find_files()
-        self.target_gbots_list = []
+        self.target_gbots_location = glob.glob("./Bots/*.gbot")
+        pprint(self.target_gbots_location)
+        self.gbot_lists = {}
         for gbot in self.target_gbots_location:
-            file = gbot.split("\\")[-1]
-            self.target_gbots_list.append(file)
-        self.top_dropdown["completevalues"] = self.target_gbots_list
+            name = gbot.split("\\")[-1]
+            self.gbot_lists[name] = Gbots(gbot)
+        self.top_dropdown["completevalues"]=list(self.gbot_lists.keys())
+        return
 
     def insert_edit_section_list(self):
         ind = 0
