@@ -21,13 +21,13 @@ class Gbots:
         self.file_path = path
         self.bot_name = path.split("\\")[-1]
         self.command_list = []
-
+        self.Configs = "a"
         with open(path, "r", encoding='utf-8') as f:
             self.file_json = json.load(f)
 
 
     def get_commands(self):
-        th = self.settings["Config.cfg"]
+        # th = 
         comms = self.file_json["Commands"]["$values"]
         ItemNoColon = ["Is in combat", "Is not in combat", "Is Member", "Is Not Member"]
         index = 0
